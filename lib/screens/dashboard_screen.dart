@@ -1,44 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/debt_provider.dart';
 import '../theme/app_theme.dart';
+import '../models/transaction.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/transaction_card.dart';
 import '../widgets/quick_stats.dart';
+import '../widgets/debt_summary_card.dart';
 import 'add_transaction_screen.dart';
 import 'transaction_list_screen.dart';
-
+import 'debt_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<TransactionProvider>();
-      provider.loadTransactions();
-      provider.loadCategories();
-    });
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final transactionProvider = context.read<TransactionProvider>();
+        final debtProvider = context.read<DebtProvider>();
+        
+        await Future.wait([
+          transactionProvider.loadTransactions(),
+          transactionProvider.loadCategories(),
+          debtProvider.loadDebts(),
+        ]);
+        
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<TransactionProvider>();
+    final transactionProvider = context.watch<TransactionProvider>();
+    final debtProvider = context.watch<DebtProvider>();
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: Text(
-          'DUITQUE',
+          'DuitQue',
           style: GoogleFonts.poppins(
             color: AppTheme.primaryColor,
             fontWeight: FontWeight.w700,
@@ -61,7 +88,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await provider.loadTransactions();
+          await Future.wait([
+            transactionProvider.loadTransactions(),
+            debtProvider.loadDebts(),
+          ]);
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -70,16 +100,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               // Balance Card
               BalanceCard(
-                balance: provider.balance,
-                income: provider.totalIncome,
-                expense: provider.totalExpense,
+                balance: transactionProvider.balance,
+                income: transactionProvider.totalIncome,
+                expense: transactionProvider.totalExpense,
+              ),
+              const SizedBox(height: 20),
+
+              // Debt Summary Card
+              DebtSummaryCard(
+                totalDebt: debtProvider.totalDebt,
+                activeDebtsCount: debtProvider.activeDebtsCount,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DebtListScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
 
               // Quick Stats
               QuickStats(
-                todayExpense: provider.todayExpense,
-                monthlyExpense: provider.monthlyExpense,
+                todayExpense: transactionProvider.todayExpense,
+                monthlyExpense: transactionProvider.monthlyExpense,
               ),
               const SizedBox(height: 20),
 
@@ -120,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 12),
 
               // Recent Transactions List
-              _buildRecentTransactions(provider),
+              _buildRecentTransactions(context, transactionProvider),
             ],
           ),
         ),
@@ -140,7 +185,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentTransactions(TransactionProvider provider) {
+  Widget _buildRecentTransactions(BuildContext context, TransactionProvider provider) {
+    if (_isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(40),
+        decoration: AppTheme.cardDecoration,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final recentTransactions = provider.getRecentTransactions();
 
     if (recentTransactions.isEmpty) {
@@ -152,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Icon(
               Icons.receipt_long,
               size: 64,
-              color: AppTheme.textSecondary.withValues(alpha: 0.5),
+              color: AppTheme.textSecondary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -166,7 +221,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               'Tambahkan transaksi pertama Anda',
               style: GoogleFonts.inter(
-                color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                color: AppTheme.textSecondary.withOpacity(0.7),
                 fontSize: 14,
               ),
             ),
@@ -223,14 +278,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      transaction.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
+                    Expanded(
+                      child: Text(
+                        transaction.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -325,6 +385,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         onPressed: () {
                           Navigator.pop(context);
                           // TODO: Navigate to edit screen
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => EditTransactionScreen(transaction: transaction),
+                          //   ),
+                          // );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
@@ -365,12 +431,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               fontSize: 14,
             ),
           ),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              color: AppTheme.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              value,
+              style: GoogleFonts.inter(
+                color: AppTheme.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -379,7 +450,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _deleteTransaction(String id, TransactionProvider provider) async {
-    final confirmed = await showDialog(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
@@ -417,17 +488,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
 
     if (confirmed == true) {
-      await provider.deleteTransaction(id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Transaksi berhasil dihapus',
-              style: GoogleFonts.inter(),
+      try {
+        await provider.deleteTransaction(id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Transaksi berhasil dihapus',
+                style: GoogleFonts.inter(),
+              ),
+              backgroundColor: AppTheme.successColor,
             ),
-            backgroundColor: AppTheme.successColor,
-          ),
-        );
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Gagal menghapus transaksi: $e',
+                style: GoogleFonts.inter(),
+              ),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
       }
     }
   }

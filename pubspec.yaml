@@ -30,11 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+  flutter_localizations:  # ← TAMBAHKAN INI
+    sdk: flutter
+
   # UI & Styling
   google_fonts: ^6.1.0
-  syncfusion_flutter_charts: ^25.1.48
-  intl: ^0.19.0
+  syncfusion_flutter_charts: ^32.1.20
+  intl: ^0.20.0
   
   # State Management
   provider: ^6.1.1
@@ -42,6 +44,7 @@ dependencies:
   # Database
   sqflite: ^2.3.3+2
   path: ^1.9.0
+  shared_preferences: ^2.5.4
   
   # Utilities
   uuid: ^4.4.0
@@ -60,6 +63,26 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/iconDuitque.png"
+  min_sdk_android: 21
+  
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/icon/iconDuitque.png
+
+  android: true
+  ios: true
+  web: false
+
+  android_12:
+    color: "#FFFFFF"
+    image: assets/icon/iconDuitque.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -75,6 +98,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/icon/iconDuitque.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

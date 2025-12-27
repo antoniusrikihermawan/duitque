@@ -22,6 +22,25 @@ class Transaction {
     this.paymentMethod,
   }) : id = id ?? const Uuid().v4();
 
+  // Static method untuk inisialisasi locale sekali
+  static bool _isLocaleInitialized = false;
+  
+  static Future<void> _initializeLocaleIfNeeded() async {
+    if (!_isLocaleInitialized) {
+      try {
+        // Import diperlukan untuk initializeDateFormatting
+        // import 'package:intl/date_symbol_data_local.dart';
+        // await initializeDateFormatting('id_ID', null);
+        // _isLocaleInitialized = true;
+        
+        // Untuk sekarang, gunakan tanpa locale spesifik dulu
+        _isLocaleInitialized = true;
+      } catch (e) {
+        print('Error initializing locale: $e');
+      }
+    }
+  }
+
   Transaction copyWith({
     String? id,
     String? title,
@@ -70,17 +89,39 @@ class Transaction {
 
   // ================= FORMATTER =================
 
-  String get formattedDate =>
-      DateFormat('dd MMM yyyy', 'id_ID').format(date);
+  String get formattedDate {
+    try {
+      // Coba dengan locale Indonesia, jika gagal gunakan default
+      return DateFormat('dd MMM yyyy', 'id_ID').format(date);
+    } catch (e) {
+      // Fallback ke format tanpa locale
+      return DateFormat('dd MMM yyyy').format(date);
+    }
+  }
 
-  String get formattedTime =>
-      DateFormat('HH:mm', 'id_ID').format(date);
+  String get formattedTime {
+    try {
+      return DateFormat('HH:mm', 'id_ID').format(date);
+    } catch (e) {
+      return DateFormat('HH:mm').format(date);
+    }
+  }
 
-  String get formattedAmount =>
-      'Rp ${NumberFormat('#,###', 'id_ID').format(amount)}';
+  String get formattedAmount {
+    try {
+      return 'Rp ${NumberFormat('#,###', 'id_ID').format(amount)}';
+    } catch (e) {
+      return 'Rp ${NumberFormat('#,###').format(amount)}';
+    }
+  }
 
-  String get dayName =>
-      DateFormat('EEEE', 'id_ID').format(date);
+  String get dayName {
+    try {
+      return DateFormat('EEEE', 'id_ID').format(date);
+    } catch (e) {
+      return DateFormat('EEEE').format(date);
+    }
+  }
 }
 
 // =================================================
