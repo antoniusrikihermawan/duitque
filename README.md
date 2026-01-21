@@ -8,8 +8,8 @@ Repositori ini tidak menyertakan file konfigurasi Firebase demi keamanan. Sebelu
    - `firebase.json`
 
 2. **Penempatan File**:
-   - Letakkan `google-services.json` di folder: `android/app/`
-   - Letakkan `firebase_options.dart` di folder: `lib/`
+   - Letakkan `google-services.json` di folder: `android/app/src`
+   - Letakkan `firebase_options.dart` di folder: `lib/widgets`
    - Letakkan `firebase.json` di root folder proyek (folder utama).
 
 3. **Jalankan Aplikasi**:
