@@ -1,16 +1,19 @@
-# finance_tracker
+## Panduan Persiapan Kolaborasi (PENTING)
 
-A new Flutter project.
+Repositori ini tidak menyertakan file konfigurasi Firebase demi keamanan. Sebelum menjalankan aplikasi, silakan ikuti langkah berikut:
 
-## Getting Started
+1. **Dapatkan File Konfigurasi**: Hubungi admin/pemilik proyek untuk mendapatkan file berikut:
+   - `google-services.json`
+   - `firebase_options.dart`
+   - `firebase.json`
 
-This project is a starting point for a Flutter application.
+2. **Penempatan File**:
+   - Letakkan `google-services.json` di folder: `android/app/`
+   - Letakkan `firebase_options.dart` di folder: `lib/`
+   - Letakkan `firebase.json` di root folder proyek (folder utama).
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. **Jalankan Aplikasi**:
+   Setelah file terpasang, jalankan perintah:
+   ```bash
+   flutter pub get
+   flutter run
