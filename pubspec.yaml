@@ -2,7 +2,7 @@ name: finance_tracker
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -30,22 +30,31 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:  # ← TAMBAHKAN INI
+  flutter_localizations: # ← TAMBAHKAN INI
     sdk: flutter
+
+  # File & Image Handling
+  image_picker: ^1.1.2
+  firebase_storage: 12.4.10
+
+  # Firebase
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  google_sign_in: ^6.2.1
 
   # UI & Styling
   google_fonts: ^6.1.0
   syncfusion_flutter_charts: ^32.1.20
   intl: ^0.20.0
-  
+
   # State Management
   provider: ^6.1.1
-  
+
   # Database
   sqflite: ^2.3.3+2
   path: ^1.9.0
   shared_preferences: ^2.5.4
-  
+
   # Utilities
   uuid: ^4.4.0
   table_calendar: ^3.0.10
@@ -71,7 +80,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/iconDuitque.png"
   min_sdk_android: 21
-  
+
 flutter_native_splash:
   color: "#FFFFFF"
   image: assets/icon/iconDuitque.png
@@ -89,7 +98,6 @@ flutter_native_splash:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -99,6 +107,9 @@ flutter:
   assets:
     - assets/
     - assets/icon/iconDuitque.png
+    - assets/icon/google-logo.png
+    - assets/icon/email-logo.png
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
